@@ -227,8 +227,7 @@ export default function HomePage() {
             transition={{ delay: 0.8, duration: 0.8 }}
             className="mt-8 text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
           >
-            A clean and elegant profile generator that helps you make a lasting
-            impression on GitHub.
+            A clean and elegant profile generator that helps you make a lasting impression on GitHub.
           </motion.p>
         </div>
 {/* Floating Navigation Dock */}
