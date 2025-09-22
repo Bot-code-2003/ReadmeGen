@@ -149,13 +149,14 @@ export default function DynamicForm() {
   
 
   const toggleSkill = (id: string) => {
-    setFormData((prev) => ({
+    setFormData((prev: FormData) => ({
       ...prev,
       stack: prev.stack.includes(id)
         ? prev.stack.filter((s) => s !== id)
         : [...prev.stack, id],
     }));
   };
+  
 
   const nextStep = () => {
     if (step < totalSteps - 1) {
