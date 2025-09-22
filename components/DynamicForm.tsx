@@ -132,19 +132,21 @@ export default function DynamicForm() {
     key: string,
     value: string | boolean
   ) => {
-    setFormData((prev) => {
+    setFormData((prev: FormData) => {
       if (section === "hero") {
-        return { ...prev, hero: { ...prev.hero, [key]: value } };
+        return { ...prev, hero: { ...prev.hero, [key]: value as string } };
       }
       if (section === "stats") {
-        return { ...prev, stats: { ...prev.stats, [key]: value } };
+        return { ...prev, stats: { ...prev.stats, [key]: value as string | boolean } };
       }
       if (section === "socials") {
-        return { ...prev, socials: { ...prev.socials, [key]: value } };
+        return { ...prev, socials: { ...prev.socials, [key]: value as string } };
       }
-      return { ...prev, [section]: value };
+      // for about, hobbies, quote
+      return { ...prev, [section]: value as string };
     });
   };
+  
 
   const toggleSkill = (id: string) => {
     setFormData((prev) => ({
