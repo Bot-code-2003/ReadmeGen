@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FormData } from "@/common/types";
 
 const techCategories = {
   "Programming Languages": [
@@ -57,7 +58,12 @@ const socials = [
   { id: "website", label: "Personal Website", placeholder: "e.g., your-website.com" },
 ];
 
-const ToggleSwitch = ({ label, isToggled, onToggle }) => {
+interface ToggleSwitchProps {
+  label: string;
+  isToggled: boolean;
+  onToggle: () => void;
+}
+const ToggleSwitch = ({ label, isToggled, onToggle }: ToggleSwitchProps) => {
   return (
     <motion.div
       className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
@@ -79,7 +85,6 @@ const ToggleSwitch = ({ label, isToggled, onToggle }) => {
     </motion.div>
   );
 };
-
 // 🌱 Sprout animation for selected skills
 const Sprout = () => (
   <motion.div
@@ -122,7 +127,11 @@ export default function DynamicForm() {
     return () => clearTimeout(timer);
   }, [formData]);
 
-  const handleChange = (section, key, value) => {
+  const handleChange = (
+    section: keyof FormData | 'hero' | 'stats' | 'socials' | 'about' | 'hobbies' | 'quote',
+    key: string,
+    value: any
+  ) => {
     setFormData((prev) => {
       if (section === "hero") {
         return { ...prev, hero: { ...prev.hero, [key]: value } };
@@ -137,7 +146,7 @@ export default function DynamicForm() {
     });
   };
 
-  const toggleSkill = (id) => {
+  const toggleSkill = (id: string) => {
     setFormData((prev) => ({
       ...prev,
       stack: prev.stack.includes(id)
