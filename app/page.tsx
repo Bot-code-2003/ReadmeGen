@@ -388,7 +388,7 @@ export default function HomePage() {
       viewport={{ once: true }}
       transition={{ delay: 0.2 }}
     >
-      A great GitHub profile is your professional calling card. It's where your work speaks for itself, opening doors to new opportunities.
+      A great GitHub profile is your professional calling card. Its where your work speaks for itself, opening doors to new opportunities.
     </motion.p>
     <div className="max-w-xl mx-auto mt-16 space-y-12">
       {[
