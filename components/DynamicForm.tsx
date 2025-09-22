@@ -128,9 +128,9 @@ export default function DynamicForm() {
   }, [formData]);
 
   const handleChange = (
-    section: keyof FormData | 'hero' | 'stats' | 'socials' | 'about' | 'hobbies' | 'quote',
+    section: keyof FormData,
     key: string,
-    value: any
+    value: string | boolean
   ) => {
     setFormData((prev) => {
       if (section === "hero") {
