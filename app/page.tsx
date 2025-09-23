@@ -131,7 +131,7 @@ export default function HomePage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50/30 to-white text-gray-900 flex flex-col font-sans overflow-hidden">
+    <div className="min-h-screen bg-gray-50  text-gray-900 flex flex-col font-sans overflow-hidden">
 
 
       {/* Header */}
@@ -171,110 +171,109 @@ export default function HomePage() {
 </header>
 
       {/* Hero */}
-      <main className="flex-1 min-h-[100vh] mt-5 flex items-center justify-center text-center relative py-48 overflow-hidden">
-        {/* Hero Content with Title Flowers */}
-        <div className="max-w-5xl px-8 relative z-10">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-6xl md:text-8xl font-extrabold tracking-tight leading-none relative"
-          >
-            <div className="relative inline-block">
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.8 }}
-              >
-                Create Your
-              </motion.span>
-              {/* Flower underneath "Create" to the left */}
-              <TitleFlower 
-                className="-bottom-16 -left-20 z-[-1]" 
-                delay={1.2} 
-                rotate={-15}
-              />
-            </div>
-            <br />
+      <main className="flex-1 min-h-[100vh] flex items-center justify-center text-center relative overflow-hidden">
+      {/* Hero Content with Title Flowers */}
+      <div className="max-w-5xl px-8 relative z-10">
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-6xl md:text-8xl font-extrabold tracking-tight leading-none relative"
+        >
+          <div className="relative inline-block">
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
             >
-              Professional
-            </motion.span>{" "}
-            <div className="relative inline-block">
-              <motion.span
-                className="text-transparent bg-gradient-to-r from-gray-400 via-gray-500 to-gray-400 bg-clip-text"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
-              >
-                README
-              </motion.span>
-              {/* Flower on "README" to the right */}
-              <TitleFlower 
-                className="-top-8 -right-24 z-[-1]" 
-                delay={1.6} 
-                rotate={25}
-              />
-            </div>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.8 }}
-            className="mt-8 text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
+              Create Your
+            </motion.span>
+            {/* Flower underneath "Create" to the left */}
+            <TitleFlower
+              className="-bottom-16 -left-20 z-[-1]"
+              delay={1.2}
+              rotate={-15}
+            />
+          </div>
+          <br />
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
           >
-            A clean and elegant profile generator that helps you make a lasting impression on GitHub.
-          </motion.p>
-        </div>
-{/* Floating Navigation Dock */}
-<motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ delay: 1, duration: 0.8 }}
-  className="fixed bottom-4 left-1/2 -translate-x-1/2 px-3 py-2 bg-white/70 backdrop-blur-lg rounded-full shadow-lg border border-gray-200/50 z-50"
->
-  <div className="flex items-center space-x-2 sm:space-x-4 text-gray-800">
-    {/* Start Creating Button */}
-    <Link href="/form">
-      <motion.button
-        className="flex items-center justify-center gap-2 px-4 py-2 sm:px-6 sm:py-3 bg-gray-900 text-white rounded-full shadow-md text-sm sm:text-base font-medium hover:bg-gray-800 transition-all"
-        whileTap={{ scale: 0.95 }}
+            Professional
+          </motion.span>{" "}
+          <div className="relative inline-block">
+            <motion.span
+              className="text-transparent bg-gradient-to-r from-gray-400 via-gray-500 to-gray-400 bg-clip-text"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+            >
+              README
+            </motion.span>
+            {/* Flower on "README" to the right */}
+            <TitleFlower
+              className="-top-8 -right-24 z-[-1]"
+              delay={1.6}
+              rotate={25}
+            />
+          </div>
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.8 }}
+          className="mt-8 text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
+        >
+          A clean and elegant profile generator that helps you make a lasting impression on GitHub.
+        </motion.p>
+      </div>
+
+      {/* Floating Navigation Dock */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1, duration: 0.8 }}
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 px-3 py-2 bg-white/70 backdrop-blur-lg rounded-full shadow-lg border border-gray-200/50 z-50"
       >
-        {/* Mobile: only icon */}
-        <ArrowRight className="w-5 h-5 sm:hidden" />
-        {/* Tablet/Desktop: text */}
-        <span className="hidden sm:inline">Start Creating</span>
-      </motion.button>
-    </Link>
+        <div className="flex items-center space-x-2 sm:space-x-4 text-gray-800">
+          {/* Start Creating Button */}
+          <Link href="/form">
+            <motion.button
+              className="flex items-center justify-center gap-2 px-4 py-2 sm:px-6 sm:py-3 bg-gray-900 text-white rounded-full shadow-md text-sm sm:text-base font-medium hover:bg-gray-800 transition-all"
+              whileTap={{ scale: 0.95 }}
+            >
+              {/* Mobile: only icon */}
+              <ArrowRight className="w-5 h-5 sm:hidden" />
+              {/* Tablet/Desktop: text */}
+              <span className="hidden sm:inline">Start Creating</span>
+            </motion.button>
+          </Link>
 
-    {/* Templates Link */}
-    <motion.a
-      href="/preview"
-      className="flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 rounded-full text-gray-700 hover:bg-gray-100 transition-colors text-sm sm:text-base"
-      whileTap={{ scale: 0.95 }}
-    >
-      <Layers className="w-5 h-5 sm:hidden" />
-      <span className="hidden sm:inline">Templates</span>
-    </motion.a>
+          {/* Templates Link */}
+          <motion.a
+            href="/preview"
+            className="flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 rounded-full text-gray-700 hover:bg-gray-100 transition-colors text-sm sm:text-base"
+            whileTap={{ scale: 0.95 }}
+          >
+            <Layers className="w-5 h-5 sm:hidden" />
+            <span className="hidden sm:inline">Templates</span>
+          </motion.a>
 
-    {/* How It Works Link */}
-    <motion.a
-      href="#how-it-works"
-      className="flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 rounded-full text-gray-700 hover:bg-gray-100 transition-colors text-sm sm:text-base"
-      whileTap={{ scale: 0.95 }}
-    >
-      <ClipboardList className="w-5 h-5 sm:hidden" />
-      <span className="hidden sm:inline">How It Works</span>
-    </motion.a>
-  </div>
-</motion.div>
-
-      </main>
-
+          {/* How It Works Link */}
+          <motion.a
+            href="#how-it-works"
+            className="flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 rounded-full text-gray-700 hover:bg-gray-100 transition-colors text-sm sm:text-base"
+            whileTap={{ scale: 0.95 }}
+          >
+            <ClipboardList className="w-5 h-5 sm:hidden" />
+            <span className="hidden sm:inline">How It Works</span>
+          </motion.a>
+        </div>
+      </motion.div>
+    </main>
       {/* Enhanced Bento Grid Features */}
  {/* Refined Bento Grid Features */}
 <section id="features" className="pb-20">
