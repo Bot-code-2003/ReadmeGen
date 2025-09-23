@@ -87,7 +87,7 @@ export const themes = [
     markdownTemplate: `
 <div align="center">
 
-<p><img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=28&duration=4000&pause=1000&color=39FF14&center=true&vCenter=true&width=600&lines=⚡+{{hero.name}}+⚡;Cyber+Punk+Geek;" alt="Typing SVG" /></p>
+<p><img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=28&duration=4000&pause=1000&color=39FF14&center=true&vCenter=true&width=600&lines=⚡+{{hero.name_encoded}}+⚡;Cyber+Punk+Geek;" alt="Typing SVG" /></p>
 
 <pre align="center" style="color:#39ff14;">
 ██████╗ ██╗  ██╗ █████╗ ██████╗ ███╗   ███╗
@@ -148,75 +148,14 @@ export const themes = [
 `,
   },
   {
-    id: "medieval",
-    name: "medieval scroll",
-    banner: "https://media.giphy.com/media/5biVE87F1MER4UHfGY/giphy.gif",
-    logoColor: "000000",
-    statsTheme: "gruvbox",
-    trophyTheme: "chalk",
-    colors: ["8B4513", "8B0000", "B8860B", "556B2F", "6A5ACD", "483C32", "A52A2A"],
-
-    markdownTemplate: `
-<div align="center">
-
-<img src="https://media.giphy.com/media/5biVE87F1MER4UHfGY/giphy.gif" width="100%" alt="castle-banner"/>
-
-<h1>
-  📜 The Chronicles of {{hero.name}}
-</h1>
-
-<p>
-  <em>
-    {{hero.tagline}}
-  </em>
-</p>
-
-</div>
-
----
-
-### 🪶 The Prologue
-{{about.content}}
-
----
-
-### ⚔️ Royal Armory
-<div align="center">
-  {{stack.badges}}
-</div>
-
----
-
-### 🕯️ Bard’s Scrolls
-{{hobbies.content}}
-
----
-
-### 📖 The Chronicles
-{{stats.content}}
-
----
-
-### 👑 Decrees of Honor
-{{trophies.content}}
-
----
-
-### 🔗 Guild Connections
-{{socials.content}}
-
----
-
-<div align="center">
-
-<h3>
-  ✦ In Code We Trust ✦
-</h3>
-
-<img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeW5lZ2ZzNnQ1eXNic25xbmxpdHBwZHJvMDBoM3htY243MDRqa3oxMiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/9V5r8VjvEaNthMZMPx/giphy.gif" width="250" alt="torch"/>   
-</div>
-`,
-  },
-  
+    "id": "medieval-artisan",
+    "name": "medieval scroll",
+    "banner": "https://media.giphy.com/media/5biVE87F1MER4UHfGY/giphy.gif",
+    "logoColor": "000000",
+    "statsTheme": "gruvbox",
+    "trophyTheme": "chalk",
+    "colors": ["8B4513", "8B0000", "B8860B", "556B2F", "6A5ACD", "483C32", "A52A2A"],
+    "markdownTemplate": "<div align=\"center\">\n  <img src=\"https://media.giphy.com/media/5biVE87F1MER4UHfGY/giphy.gif\" width=\"100%\" alt=\"castle-banner\"/>\n\n  <h1>\n    <img src=\"https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdXBtbnZ4N2MyMTFtczlwdTN3YzA1ZHJ2Zng3aGF3OG4xbjNnazBzMCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/142UUuhYoZqlG/giphy.gif\" width=\"50\" alt=\"crown\"/>\n    The Chronicle of {{hero.name}}\n    <img src=\"https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdXBtbnZ4N2MyMTFtczlwdTN3YzA1ZHJ2Zng3aGF3OG4xbjNnazBzMCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/142UUuhYoZqlG/giphy.gif\" width=\"50\" alt=\"crown\"/>\n  </h1>\n  <p><em>\"{{hero.tagline}}\"</em></p>\n</div>\n\n---\n\n### 📜 From the Royal Scribe\n> _Hear ye, hear ye! The following pages document the valiant deeds and noble pursuits of our most esteemed artisan._\n<br>\n{{about.content}}\n\n---\n\n<br>\n\n| | |\n| :--- | :--- |\n| <img align=\"right\" width=\"150\" src=\"https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjc1MGtycG9jNmJkdTV0Y3prZWJiYjA1ejM2c2p6czFhYWIxYTgwOSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TNb3Ihssb6T5FpcdOY/giphy.gif\" alt=\"sword-and-shield\"/> | ⚔️ The Artisan's Toolkit<br> <div align=\"left\">{{stack.badges}}</div> |\n| <img align=\"right\" width=\"150\" src=\"https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzFkNHBqNmdwZzZ0bDExYzh1NDA3MXN2azAycHkxMGkxMmRmNW0ydiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/11dzD6gWgmR8Qg/giphy.gif\" alt=\"quill-and-ink\"/> | 🖋️ A Poet's Pastimes<br> <div align=\"left\">{{hobbies.content}}</div> |\n\n<br>\n\n---\n\n### 📊 The Grand Ledger\n<div align=\"center\">\n  <p>_A record of the scribe's dedication, penned with every commit._</p>\n  <img src=\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3aRz2gfH1AXGA23CsN3zwS2HV6CVGHJ_YQQ&s\" align=\"right\" width=\"250\" alt=\"ledger-book-art\"/>\n</div>\n<br>\n{{stats.content}}\n<br>\n<br>\n\n---\n\n### 👑 Hall of Triumphs\n> _These decrees were earned through feats of skill and perseverance._\n<div align=\"center\">\n  {{trophies.content}}\n\n</div>\n\n---\n\n### 🤝 The King's Messengers\n_Dispatching the latest news and connecting with fellow guilds._\n<br>\n{{socials.content}}\n<br>\n\n---\n\n<div align=\"center\">\n  <img src=\"https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbnM5bWZoOTc0NWZhczk3ZjEzNXl0eXU2ajRkdGcwOW83aTZ0aGR2aiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bHSkKRvkRvy5chUBBp/giphy.gif\" width=\"300\" alt=\"knight-footer\"/>\n  <p>_May your code be noble and your fortress secure._</p>\n</div>"
+}
   
 ];

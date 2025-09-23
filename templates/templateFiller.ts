@@ -41,8 +41,16 @@ export function fillTemplate(
   console.log("👉 LogoColor:", logoColor);
 
   // --- Hero placeholders
-  filledTemplate = filledTemplate.replace(/\{\{hero\.name\}\}/g, data.hero.name || "");
-  filledTemplate = filledTemplate.replace(/\{\{hero\.tagline\}\}/g, data.hero.tagline || "");
+// --- Hero placeholders
+// Normal hero name
+filledTemplate = filledTemplate.replace(/\{\{hero\.name\}\}/g, data.hero.name || "");
+
+// URL-safe version (for typing effect etc.)
+const encodedHeroName = encodeURIComponent(data.hero.name || "");
+filledTemplate = filledTemplate.replace(/\{\{hero\.name_encoded\}\}/g, encodedHeroName);
+
+filledTemplate = filledTemplate.replace(/\{\{hero\.tagline\}\}/g, data.hero.tagline || "");
+
 
   // --- About
   if (data.about && data.about.trim() !== "") {
@@ -97,7 +105,7 @@ export function fillTemplate(
     <img width="60%" src="https://github-readme-stats.vercel.app/api?username=${data.stats.github_username}&theme=${statsTheme}" />
   </a>
   <a href="https://github.com/${data.stats.github_username}">
-    <img width="60%" src="http://github-readme-streak-stats.herokuapp.com/?user=${data.stats.github_username}&theme=${statsTheme}&date_format=M%20j%5B%2C%20Y%5D&ring=ff3068&fire=ff3068&sideNums=ff3068" />
+    <img width="60%" src="https://github-readme-streak-stats.herokuapp.com/?user=${data.stats.github_username}&theme=${statsTheme}&date_format=M%20j%5B%2C%20Y%5D&ring=ff3068&fire=ff3068&sideNums=ff3068" />
   </a>
   `;
       filledTemplate = filledTemplate.replace(/\{\{stats\.content\}\}/g, statsContent);
