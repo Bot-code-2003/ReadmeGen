@@ -358,7 +358,7 @@ export default function PreviewPage() {
               >
                 {/* Banner Image with Hover Scroll Effect */}
                 <motion.div 
-                  className="h-[350px] w-full relative overflow-hidden"
+                  className="h-[300px] w-full relative overflow-hidden"
                   whileHover="hover"
                   initial="initial"
                 >
