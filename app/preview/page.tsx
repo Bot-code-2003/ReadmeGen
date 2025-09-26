@@ -1,31 +1,21 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { themes } from "@/templates/themes";
 import { fillTemplate } from "@/templates/templateFiller";
 import { FormData } from "@/common/types";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 
-import {
-  Github,
-  Coffee,
-  Eye,
-  Check,
-  Copy,
-  X,
-} from "lucide-react";
-
-const MarkdownPreview = dynamic(() => import("@/components/MarkdownPreview"), {
-  ssr: false,
-});
+import { Github, Coffee, Eye, Check, Copy } from "lucide-react";
 
 const defaultFormData: FormData = {
   hero: { name: "Dharmadeep Madisetty", tagline: "AI/ML Engineer" },
-  about: "Exploring Generative AI and Frontend Craft.\n Founder of CasualYaps.com.\nInspired by minimalism, nostalgia, and the future.\nAlways tinkering, always building.",
+  about:
+    "Exploring Generative AI and Frontend Craft.\n Founder of CasualYaps.com.\nInspired by minimalism, nostalgia, and the future.\nAlways tinkering, always building.",
   stack: ["react", "nextjs", "javascript", "python", "go", "rust"],
-  hobbies: "Gaming under neon skies\nAnime & cyberpunk films\nManga & stories that linger\nCoffee + synthwave",
+  hobbies:
+    "Gaming under neon skies\nAnime & cyberpunk films\nManga & stories that linger\nCoffee + synthwave",
   stats: { showStats: true, showTrophies: true, github_username: "Bot-code-2003" },
   socials: {
     github: "Bot-code-2003",
@@ -36,212 +26,153 @@ const defaultFormData: FormData = {
   quote: "⬢ Code ⬢ Create ⬢ Escape ⬢ Repeat ⬢",
 };
 
-// Modal component for preview with dark theme
-const PreviewModal = ({ 
-  isOpen, 
-  content, 
-  onClose 
+/**
+ * Simple deep-set helper for dot-notation keys (e.g. "hero.name")
+ */
+function setDeep(obj: any, path: string, value: any) {
+  const parts = path.split(".");
+  let cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const p = parts[i];
+    if (!cur[p] || typeof cur[p] !== "object") cur[p] = {};
+    cur = cur[p];
+  }
+  cur[parts[parts.length - 1]] = value;
+}
+
+/**
+ * Prefill local draft with an optional patch (dot-notation) and attach template id.
+ * Then navigate to a route using next/router.
+ */
+function prefillDraftAndNavigate(
+  patch: Record<string, any> = {},
+  themeId?: string,
+  routerPush?: (path: string) => void,
+  navigateTo: string = "/form"
+) {
+  try {
+    const raw = localStorage.getItem("formData");
+    const draft: any = raw ? JSON.parse(raw) : {};
+    Object.entries(patch).forEach(([k, v]) => {
+      setDeep(draft, k, v);
+    });
+    if (themeId) draft._selectedTemplate = { id: themeId, at: Date.now() };
+    localStorage.setItem("formData", JSON.stringify(draft));
+    if (routerPush) routerPush(navigateTo);
+    else window.location.href = navigateTo;
+  } catch (err) {
+    console.error("prefillDraftAndNavigate failed", err);
+    if (routerPush) routerPush(navigateTo);
+    else window.location.href = navigateTo;
+  }
+}
+
+/** Simple modal: left half theme image, right half actions (Proceed / Back) */
+function PreviewModalSimple({
+  isOpen,
+  theme,
+  onClose,
+  onProceed,
 }: {
   isOpen: boolean;
-  content: string;
+  theme: any | null;
   onClose: () => void;
-}) => {
-  const [copied, setCopied] = useState(false);
-  const [editableContent, setEditableContent] = useState(content);
-
+  onProceed: (theme: any) => void;
+}) {
   useEffect(() => {
-    setEditableContent(content);
-  }, [content]);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    if (isOpen) window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(editableContent);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      onClose();
-    }
-  };
-
-  if (!isOpen) return null;
+  if (!isOpen || !theme) return null;
 
   return (
     <AnimatePresence>
-      <div 
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-      >
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
+          initial={{ scale: 0.98, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white w-screen h-screen flex flex-col overflow-hidden"
+          exit={{ scale: 0.98, opacity: 0 }}
+          className="bg-white w-full max-w-4xl h-[85vh] rounded-xl overflow-hidden shadow-2xl flex"
         >
-          {/* Header */}
-          <div className="bg-white border-b border-gray-200 p-4 flex justify-between items-center">
-            <h3 className="text-xl font-bold text-gray-900">Live Preview</h3>
-            <div className="flex space-x-2">
-              <motion.button
-                onClick={handleCopy}
-                className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center space-x-2"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <AnimatePresence mode="wait">
-                  {copied ? (
-                    <motion.div
-                      key="copied"
-                      initial={{ scale: 0.8 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0.8 }}
-                      className="flex items-center space-x-2"
-                    >
-                      <Check size={16} className="text-green-400" />
-                      <span>Copied!</span>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="copy"
-                      initial={{ scale: 0.8 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0.8 }}
-                      className="flex items-center space-x-2"
-                    >
-                      <Copy size={16} />
-                      <span>Copy</span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-              <motion.button
-                onClick={onClose}
-                className="px-4 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition-colors flex items-center space-x-2"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <X size={16} />
-                <span>Close</span>
-              </motion.button>
-            </div>
+          {/* Left: banner / image */}
+          <div className="w-1/2 bg-black flex items-center justify-center overflow-hidden">
+            <img
+              src={`/assets/${theme.name}.png`}
+              alt={theme.name}
+              className="object-cover w-full h-full object-top object-center"
+              onError={(e) => {
+                // fallback to asset by id if name-based asset missing
+                (e.currentTarget as HTMLImageElement).src = `/assets/${theme.id}.png`;
+              }}
+            />
           </div>
 
-          {/* Content */}
-          <div className="flex flex-1 overflow-hidden">
-            {/* Markdown Source */}
-            <div className="w-[45%] bg-gray-900 text-white flex flex-col">
-              <div className="p-4 border-b border-gray-700">
-                <h4 className="text-lg font-semibold text-gray-200">Markdown Code</h4>
+          {/* Right: actions */}
+          <div className="w-1/2 p-8 flex flex-col justify-between">
+            <div>
+              <h3 className="text-2xl font-bold mb-2">{theme.name}</h3>
+              <p className="text-sm text-gray-600 mb-6">
+                This template is preview-only here. Click <strong>Proceed</strong> to personalize it (your draft is saved locally).
+              </p>
+
+              {/* Small meta / tags area (optional) */}
+              <div className="mb-6 flex flex-wrap gap-2">
+                <span className="inline-block bg-gray-100 text-xs px-3 py-1 rounded-full">Template</span>
+                <span className="inline-block bg-gray-100 text-xs px-3 py-1 rounded-full">Readme</span>
+                {Array.isArray(theme.colors) && (
+                  <div className="flex items-center ml-2 gap-1">
+                    {theme.colors.slice(0, 5).map((c: string, idx: number) => (
+                      <span
+                        key={idx}
+                        className="w-4 h-4 rounded-full border"
+                        style={{ backgroundColor: `#${c}` }}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-              <textarea
-                value={editableContent}
-                onChange={(e) => setEditableContent(e.target.value)}
-                className="flex-1 resize-none overflow-y-auto border-none bg-gray-900 p-4 font-mono text-sm leading-6 text-gray-200 outline-none"
-                placeholder="Your markdown content..."
-              />
+
+              <div className="text-sm text-gray-500">
+                Tip: Tech users can copy the template markdown and edit directly. Non-tech users can personalize step-by-step after clicking Proceed.
+              </div>
             </div>
 
-            {/* Preview - NOW WITH DARK THEME */}
-            <div className="w-[55%] bg-gray-900 flex flex-col">
-              <div className="p-4 border-b border-gray-700 bg-gray-800">
-                <h4 className="text-lg font-semibold text-gray-200">Live Preview</h4>
-              </div>
-              <div className="flex-1 overflow-auto p-6 bg-gray-900">
-                {/* Dark Theme CSS for Markdown */}
-                <style jsx global>{`
-                  .markdown-body {
-                    background-color: #111827 !important;
-                    color: #d1d5db !important;
-                    line-height: 1.6;
-                  }
-                  .markdown-body h1, 
-                  .markdown-body h2, 
-                  .markdown-body h3, 
-                  .markdown-body h4, 
-                  .markdown-body h5, 
-                  .markdown-body h6 {
-                    color: #f9fafb !important;
-                    border-bottom-color: #374151 !important;
-                  }
-                  .markdown-body pre {
-                    background-color: #1f2937 !important;
-                    border: 1px solid #374151 !important;
-                  }
-                  .markdown-body code {
-                    background-color: #1f2937 !important;
-                    color: #f9fafb !important;
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                  }
-                  .markdown-body pre code {
-                    background-color: transparent !important;
-                  }
-                  .markdown-body blockquote {
-                    border-left: 4px solid #6b7280 !important;
-                    background-color: #1f2937 !important;
-                    color: #d1d5db !important;
-                  }
-                  .markdown-body table {
-                    background-color: transparent !important;
-                  }
-                  .markdown-body table th, 
-                  .markdown-body table td {
-                    border: 1px solid #374151 !important;
-                    background-color: #1f2937 !important;
-                    color: #d1d5db !important;
-                  }
-                  .markdown-body table th {
-                    background-color: #374151 !important;
-                    color: #f9fafb !important;
-                  }
-                  .markdown-body a {
-                    color: #60a5fa !important;
-                  }
-                  .markdown-body a:hover {
-                    color: #93c5fd !important;
-                  }
-                  .markdown-body hr {
-                    border-color: #374151 !important;
-                  }
-                  .markdown-body ul, .markdown-body ol {
-                    color: #d1d5db !important;
-                  }
-                  .markdown-body li {
-                    color: #d1d5db !important;
-                  }
-                  .markdown-body strong {
-                    color: #f9fafb !important;
-                  }
-                  .markdown-body em {
-                    color: #e5e7eb !important;
-                  }
-                  
-                  /* GitHub badges and external content */
-                  .markdown-body svg {
-                    background-color: transparent !important;
-                  }
-                `}</style>
-                
-                <div className="markdown-body">
-                  <MarkdownPreview markdown={editableContent} />
-                </div>
-              </div>
+            <div className="flex gap-4">
+              <button
+                onClick={() => onProceed(theme)}
+                className="flex-1 px-6 py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition"
+              >
+                Proceed
+              </button>
+
+              <button
+                onClick={onClose}
+                className="flex-1 px-6 py-3 border border-gray-300 rounded-xl text-gray-900 font-medium hover:bg-gray-50 transition"
+              >
+                Back
+              </button>
             </div>
           </div>
         </motion.div>
       </div>
     </AnimatePresence>
   );
-};
+}
+
 export default function PreviewPage() {
   const [data, setData] = useState<FormData>(defaultFormData);
   const [copiedThemeId, setCopiedThemeId] = useState<string | null>(null);
-  const [previewModal, setPreviewModal] = useState<{isOpen: boolean, content: string}>({
-    isOpen: false, 
-    content: ""
+
+  // modal state now holds theme
+  const [previewModal, setPreviewModal] = useState<{ isOpen: boolean; theme: any | null }>({
+    isOpen: false,
+    theme: null,
   });
+
   const router = useRouter();
 
   useEffect(() => {
@@ -256,31 +187,31 @@ export default function PreviewPage() {
   }, []);
 
   const handleCopy = (themeId: string, md: string) => {
-    navigator.clipboard.writeText(md).then(() => {
-      setCopiedThemeId(themeId);
-      setTimeout(() => setCopiedThemeId(null), 1500);
-    }).catch((error) => {
-      console.error("Failed to copy to clipboard:", error);
-    });
+    navigator.clipboard
+      .writeText(md)
+      .then(() => {
+        setCopiedThemeId(themeId);
+        setTimeout(() => setCopiedThemeId(null), 1500);
+      })
+      .catch((error) => {
+        console.error("Failed to copy to clipboard:", error);
+      });
   };
 
-  const openPreviewPage = (md: string) => {
-    try {
-      // Method 1: Try URL parameter approach for smaller content
-      const compressed = btoa(encodeURIComponent(md));
-      
-      // Check if URL would be too long (most browsers support ~2000 chars)
-      if (compressed.length <= 1500) {
-        router.push(`/preview/livepreview?data=${compressed}`);
-      } else {
-        // Method 2: Fallback to modal for large content
-        setPreviewModal({ isOpen: true, content: md });
-      }
-    } catch (error) {
-      console.error('Failed to encode preview data:', error);
-      // Fallback to modal
-      setPreviewModal({ isOpen: true, content: md });
-    }
+  // open the new simple preview modal with theme image & CTAs
+  const openPreviewModal = (theme: any) => {
+    setPreviewModal({ isOpen: true, theme });
+  };
+
+  // Proceed clicked in modal -> attach template to draft and navigate to /form
+  const handleProceedFromModal = (theme: any) => {
+    // Optionally pass a small patch: e.g., if you want to prefill hero from defaults in theme.presets
+    const patch: Record<string, any> = {};
+    // if theme has presets we can prefill a few keys:
+    if (theme.presets?.hero?.name) setDeep(patch, "hero.name", theme.presets.hero.name);
+    if (theme.presets?.hero?.tagline) setDeep(patch, "hero.tagline", theme.presets.hero.tagline);
+    // attach template and navigate
+    prefillDraftAndNavigate(patch, theme.id, (p: string) => router.push(p), "/form");
   };
 
   const containerVariants = {
@@ -302,10 +233,7 @@ export default function PreviewPage() {
       <header className="fixed top-0 left-0 w-full py-3 z-40 backdrop-blur-md bg-white/70 border-b border-gray-100">
         <nav className="max-w-6xl mx-auto px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2 group">
-            <motion.div
-              whileHover={{ scale: 1.1, rotate: 10 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            <motion.div whileHover={{ scale: 1.1, rotate: 10 }} whileTap={{ scale: 0.95 }}>
               <Github className="w-6 h-6 text-gray-800 group-hover:text-black transition-colors duration-200" />
             </motion.div>
             <span className="font-semibold text-lg text-gray-800 group-hover:text-black transition-colors duration-200">
@@ -328,22 +256,15 @@ export default function PreviewPage() {
       </header>
 
       {/* Body */}
-      <div className=" mx-auto">
+      <div className="mx-auto">
         <div className="text-center mb-10 space-y-4">
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">
-            Choose a Template.
-          </h2>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">Choose a Template.</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Select a template that fits your style. Customize it to create a stunning GitHub profile README.
           </p>
         </div>
 
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12" variants={containerVariants} initial="hidden" animate="visible">
           {themes.map((theme) => {
             const md = fillTemplate(theme.markdownTemplate, data, theme);
             const isCopied = copiedThemeId === theme.id;
@@ -357,26 +278,25 @@ export default function PreviewPage() {
                 className="relative flex flex-col h-full rounded-2xl bg-white border border-gray-200 shadow-sm transition-all duration-300 overflow-hidden group"
               >
                 {/* Banner Image with Hover Scroll Effect */}
-                <motion.div 
-                  className="h-[350px] w-full relative overflow-hidden"
-                  whileHover="hover"
-                  initial="initial"
-                >
+                <motion.div className="h-[350px] w-full relative overflow-hidden" whileHover="hover" initial="initial">
                   <motion.img
                     src={`/assets/${theme.name}.png`}
                     alt={theme.name}
                     className="w-full h-auto min-h-full object-cover object-top"
                     variants={{
                       initial: { y: 0 },
-                      hover: { y: -300 }
+                      hover: { y: -300 },
                     }}
-                    transition={{ 
+                    transition={{
                       duration: 0.8,
                       ease: "easeInOut",
                     }}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = theme.banner || `/assets/${theme.id}.png`;
+                    }}
                   />
                   <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
-                  
+
                   {/* Scroll Hint Indicator */}
                   <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full opacity-80 group-hover:opacity-60 transition-all duration-300 pointer-events-none">
                     ↓ Hover to scroll
@@ -384,7 +304,7 @@ export default function PreviewPage() {
 
                   {/* Bottom gradient fade for visual hint */}
                   <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-black/30 to-transparent opacity-60 group-hover:opacity-20 transition-opacity duration-300" />
-                  
+
                   {/* Subtle scroll dots indicator */}
                   <div className="absolute bottom-3 right-3 flex flex-col space-y-1 opacity-70 group-hover:opacity-40 transition-opacity duration-300">
                     <div className="w-1.5 h-1.5 bg-white rounded-full shadow-sm"></div>
@@ -393,16 +313,14 @@ export default function PreviewPage() {
                   </div>
                 </motion.div>
 
-                <div className="pl-6 text-lg mt-4">
-                  {theme.name}
-                </div>
+                <div className="pl-6 text-lg mt-4">{theme.name}</div>
 
                 {/* Actions */}
                 <div className="p-6 pt-0 flex gap-4 mt-4">
                   <motion.button
                     onClick={(e) => {
                       e.stopPropagation();
-                      openPreviewPage(md);
+                      openPreviewModal(theme);
                     }}
                     className="flex-1 inline-flex items-center justify-center px-6 py-3 text-sm font-semibold rounded-xl bg-gray-900 text-white shadow-md hover:bg-gray-800 transition-colors"
                     whileHover={{ scale: 1.05 }}
@@ -419,29 +337,15 @@ export default function PreviewPage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <AnimatePresence mode="wait">
-                      {isCopied ? (
-                        <motion.div
-                          key="copied"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          className="absolute inset-0 flex items-center justify-center text-green-600"
-                        >
-                          <Check className="h-5 w-5 mr-1" /> Copied!
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="copy-btn-content"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          className="flex items-center"
-                        >
-                          <Copy className="mr-2 h-4 w-4" /> Copy
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {isCopied ? (
+                      <div className="absolute inset-0 flex items-center justify-center text-green-600">
+                        <Check className="h-5 w-5 mr-1" /> Copied!
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <Copy className="mr-2 h-4 w-4" /> Copy
+                      </div>
+                    )}
                   </motion.button>
                 </div>
               </motion.div>
@@ -450,11 +354,15 @@ export default function PreviewPage() {
         </motion.div>
       </div>
 
-      {/* Preview Modal */}
-      <PreviewModal 
-        isOpen={previewModal.isOpen} 
-        content={previewModal.content} 
-        onClose={() => setPreviewModal({isOpen: false, content: ""})} 
+      {/* Simple Preview Modal */}
+      <PreviewModalSimple
+        isOpen={previewModal.isOpen}
+        theme={previewModal.theme}
+        onClose={() => setPreviewModal({ isOpen: false, theme: null })}
+        onProceed={(theme) => {
+          setPreviewModal({ isOpen: false, theme: null });
+          handleProceedFromModal(theme);
+        }}
       />
     </div>
   );

@@ -443,7 +443,7 @@ export default function HomePage() {
         <h4 className="font-bold text-gray-900">Quick Links</h4>
         <ul className="mt-4 space-y-2 text-gray-600">
           <li><a href="/preview" className="hover:text-gray-900 transition-colors">Templates</a></li>
-          <li><a href="https://github.com/bot-code-2003/readme-gen" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">GitHub Repo</a></li>
+          <li><a href="https://github.com/Bot-code-2003/ReadmeGen" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">GitHub Repo</a></li>
           <li><a href="https://www.linkedin.com/in/dharmadeep-madisetty-oct2003" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">Connect on Linkdin</a></li>
         </ul>
       </div>

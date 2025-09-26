@@ -178,7 +178,6 @@ function LivePreviewContent() {
             >
               <ChevronLeft size={20} />
             </motion.button>
-            <h2 className="text-lg font-bold text-gray-200">Markdown Code</h2>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -235,7 +234,6 @@ function LivePreviewContent() {
         className="flex w-1/2 flex-col rounded-lg m-4 shadow-xl border border-gray-700"
       >
         <div className="border-b border-gray-700 p-4 bg-gray-800 rounded-t-lg">
-          <h2 className="text-lg font-bold text-gray-100">Live Preview</h2>
         </div>
         <div className="markdown-body flex-1 overflow-y-auto bg-gray-900 p-6 text-gray-100 rounded-b-lg">
           <style jsx global>{`
