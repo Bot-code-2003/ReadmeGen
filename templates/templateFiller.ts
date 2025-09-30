@@ -155,8 +155,12 @@ filledTemplate = filledTemplate.replace(/\{\{hero\.tagline\}\}/g, data.hero.tagl
   if (data.quote && data.quote.trim() !== "") {
     const quoteWithBreaks = data.quote.replace(/\n/g, "<br/>");
     filledTemplate = filledTemplate.replace(/\{\{quote\.content\}\}/g, quoteWithBreaks);
+    // Also handle end_quote.content for themes that use this format
+    filledTemplate = filledTemplate.replace(/\{\{end_quote\.content\}\}/g, quoteWithBreaks);
   } else {
     filledTemplate = filledTemplate.replace(/## 💬 Quote[\s\S]*?---/g, "");
+    // Handle empty end_quote as well
+    filledTemplate = filledTemplate.replace(/\{\{end_quote\.content\}\}/g, "");
   }
 
   // --- Cleanup

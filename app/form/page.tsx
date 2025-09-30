@@ -85,7 +85,10 @@ export default function ThemeCustomizePage() {
         }
       } else {
         const t = themes.find((th) => th.id === themeId);
-        if (t) setTheme(t);
+        if (t) {
+          setTheme(t);
+          // Note: Themes with version 2.0 are now handled by split-screen form in templates page
+        }
       }
 
       // load saved form data (draft) or theme presets
@@ -176,13 +179,16 @@ export default function ThemeCustomizePage() {
         <div className="max-w-xl text-center">
           <h2 className="text-2xl font-bold mb-4">No template selected</h2>
           <p className="text-gray-600 mb-6">Please pick a template from the gallery first.</p>
-          <button onClick={() => router.push("/preview")} className="px-4 py-2 bg-gray-900 text-white rounded-lg inline-flex items-center gap-2">
-            <ArrowLeft size={16} /> Back to gallery
+          <button onClick={() => router.push("/templates")} className="px-4 py-2 bg-gray-900 text-white rounded-lg inline-flex items-center gap-2">
+            <ArrowLeft size={16} /> Back to templates
           </button>
         </div>
       </div>
     );
   }
+
+  // Note: New themes with version 2.0 are handled by the split-screen form in templates page
+  // This form page is kept for backward compatibility with older themes
 
   // theme.order expected to be array of keyword strings, fallback to default order if absent
   const order: string[] = theme.order && Array.isArray(theme.order) ? theme.order : ["hero", "about", "stack", "stats", "socials", "end_quote"];
