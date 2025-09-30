@@ -66,23 +66,6 @@ function setDeep(obj: any, path: string, value: any) {
 
 /**
  * Prefill local draft with an optional patch (dot-notation) and attach template id.
- * Then navigate to a route using next/router.
- */
-function prefillDraftAndNavigate(
-  patch: Record<string, any> = {},
-  themeId?: string,
-  routerPush?: (path: string) => void,
-  navigateTo: string = "/form"
-) {
-  try {
-    const raw = localStorage.getItem("formData");
-    const draft: any = raw ? JSON.parse(raw) : {};
-    Object.entries(patch).forEach(([k, v]) => {
-      setDeep(draft, k, v);
-    });
-    if (themeId) draft._selectedTemplate = { id: themeId, at: Date.now() };
-    localStorage.setItem("formData", JSON.stringify(draft));
-    if (routerPush) routerPush(navigateTo);
     else window.location.href = navigateTo;
   } catch (err) {
     console.error("prefillDraftAndNavigate failed", err);

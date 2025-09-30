@@ -3,12 +3,40 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Copy, Check } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { themes } from "../templates/themes";
 import { fillTemplate } from "../templates/templateFiller";
 import dynamic from "next/dynamic";
 
 const MarkdownPreview = dynamic(() => import("@/components/MarkdownPreview"), { ssr: false });
+
+interface FormField {
+  id: string;
+  label: string;
+  type: string;
+  placeholder?: string;
+  required?: boolean;
+  maxLength?: number;
+  rows?: number;
+  options?: string[];
+  defaultValue?: boolean;
+}
+
+interface FormSection {
+  id: string;
+  title: string;
+  description: string;
+  fields: FormField[];
+}
+
+interface Theme {
+  id: string;
+  name: string;
+  markdownTemplate: string;
+  order?: string[];
+  formMeta?: {
+    sections?: FormSection[];
+  };
+}
 
 interface SplitScreenFormProps {
   themeId: string;
@@ -16,12 +44,11 @@ interface SplitScreenFormProps {
 }
 
 export default function SplitScreenForm({ themeId, onBack }: SplitScreenFormProps) {
-  const router = useRouter();
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, Record<string, unknown>>>({});
   const [copied, setCopied] = useState(false);
   
   // Find the selected theme
-  const selectedTheme = themes.find((theme: any) => theme.id === themeId);
+  const selectedTheme = themes.find((theme: Theme) => theme.id === themeId);
   
   if (!selectedTheme) {
     return (
@@ -41,11 +68,11 @@ export default function SplitScreenForm({ themeId, onBack }: SplitScreenFormProp
 
   // Initialize form data with theme presets and localStorage
   useEffect(() => {
-    const initialData: any = {};
+    const initialData: Record<string, Record<string, unknown>> = {};
     
     // Load existing data from localStorage first
     const savedData = localStorage.getItem('formData');
-    let existingData: any = {};
+    let existingData: Record<string, Record<string, unknown>> = {};
     if (savedData) {
       try {
         existingData = JSON.parse(savedData);
@@ -167,10 +194,10 @@ export default function SplitScreenForm({ themeId, onBack }: SplitScreenFormProp
             <input
               type={field.type}
               placeholder={field.placeholder}
-              value={value}
+              value={String(value || '')}
               onChange={(e) => handleFieldChange(sectionId, field.id, e.target.value)}
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-gray-400 focus:outline-none transition-all duration-200"
-              maxLength={(field as any).maxLength}
+              maxLength={field.maxLength}
             />
           </div>
         );
@@ -184,15 +211,15 @@ export default function SplitScreenForm({ themeId, onBack }: SplitScreenFormProp
             </label>
             <textarea
               placeholder={field.placeholder}
-              value={value}
+              value={String(value || '')}
               onChange={(e) => handleFieldChange(sectionId, field.id, e.target.value)}
               rows={field.rows || 4}
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-gray-400 focus:outline-none transition-all duration-200 resize-none"
-              maxLength={(field as any).maxLength}
+              maxLength={field.maxLength}
             />
-            {(field as any).maxLength && (
+            {field.maxLength && (
               <p className="text-xs text-gray-500 text-right">
-                {value.length}/{(field as any).maxLength}
+                {String(value || '').length}/{field.maxLength}
               </p>
             )}
           </div>
@@ -203,7 +230,7 @@ export default function SplitScreenForm({ themeId, onBack }: SplitScreenFormProp
           <div key={field.id} className="flex items-center space-x-3">
             <input
               type="checkbox"
-              checked={value}
+              checked={Boolean(value)}
               onChange={(e) => handleFieldChange(sectionId, field.id, e.target.checked)}
               className="w-5 h-5 text-gray-900 border-gray-300 rounded focus:ring-gray-500"
             />
