@@ -278,7 +278,11 @@ export default function PreviewPage() {
                 className="relative flex flex-col h-full rounded-2xl bg-white border border-gray-200 shadow-sm transition-all duration-300 overflow-hidden group"
               >
                 {/* Banner Image with Hover Scroll Effect */}
-                <motion.div className="h-[350px] w-full relative overflow-hidden" whileHover="hover" initial="initial">
+                <motion.div 
+                  className="h-[320px] w-full relative overflow-hidden"
+                  whileHover="hover"
+                  initial="initial"
+                >
                   <motion.img
                     src={`/assets/${theme.name}.png`}
                     alt={theme.name}
