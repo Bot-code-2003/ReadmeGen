@@ -29,12 +29,13 @@ const defaultFormData: FormData = {
 /**
  * Simple deep-set helper for dot-notation keys (e.g. "hero.name")
  */
-function setDeep(obj: any, path: string, value: any) {
+function deepSet(obj: Record<string, any>, path: string, value: any) {
   const parts = path.split(".");
   let cur = obj;
   for (let i = 0; i < parts.length - 1; i++) {
     const p = parts[i];
     if (!cur[p] || typeof cur[p] !== "object") cur[p] = {};
+    if (Array.isArray(cur[p])) cur[p] = [...cur[p]];
     cur = cur[p];
   }
   cur[parts[parts.length - 1]] = value;
@@ -54,7 +55,7 @@ function prefillDraftAndNavigate(
     const raw = localStorage.getItem("formData");
     const draft: any = raw ? JSON.parse(raw) : {};
     Object.entries(patch).forEach(([k, v]) => {
-      setDeep(draft, k, v);
+      deepSet(draft, k, v);
     });
     if (themeId) draft._selectedTemplate = { id: themeId, at: Date.now() };
     localStorage.setItem("formData", JSON.stringify(draft));
@@ -208,8 +209,8 @@ export default function PreviewPage() {
     // Optionally pass a small patch: e.g., if you want to prefill hero from defaults in theme.presets
     const patch: Record<string, any> = {};
     // if theme has presets we can prefill a few keys:
-    if (theme.presets?.hero?.name) setDeep(patch, "hero.name", theme.presets.hero.name);
-    if (theme.presets?.hero?.tagline) setDeep(patch, "hero.tagline", theme.presets.hero.tagline);
+    if (theme.presets?.hero?.name) deepSet(patch, "hero.name", theme.presets.hero.name);
+    if (theme.presets?.hero?.tagline) deepSet(patch, "hero.tagline", theme.presets.hero.tagline);
     // attach template and navigate
     prefillDraftAndNavigate(patch, theme.id, (p: string) => router.push(p), "/form");
   };

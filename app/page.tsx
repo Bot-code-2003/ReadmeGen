@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Coffee, Github, Layers, Eye, ClipboardList, Copy, MessageSquare, Briefcase, TrendingUp } from "lucide-react";
+import { ArrowRight, Coffee, Github, ClipboardList, Copy, MessageSquare, Briefcase, TrendingUp, Palette, Zap, Feather } from "lucide-react";
 
 export default function HomePage() {
   const containerVariants = {

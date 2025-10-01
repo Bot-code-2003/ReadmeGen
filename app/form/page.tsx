@@ -27,9 +27,9 @@ const EMPTY_FORM: FormData = {
   // custom_md: "",
 };
 
-function setDeepCopy<T extends object>(obj: T, path: string, value: any): T {
+function setDeepCopy<T extends object>(obj: T, path: string, value: unknown): T {
   const parts = path.split(".");
-  const clone: any = JSON.parse(JSON.stringify(obj || {}));
+  const clone = JSON.parse(JSON.stringify(obj || {}));
   let cur = clone;
   for (let i = 0; i < parts.length - 1; i++) {
     const p = parts[i];
@@ -37,11 +37,11 @@ function setDeepCopy<T extends object>(obj: T, path: string, value: any): T {
     cur = cur[p];
   }
   cur[parts[parts.length - 1]] = value;
-  return clone;
+  return clone as T;
 }
 
 /** simple debounce hook */
-function useDebouncedEffect(fn: () => void, deps: any[], delay = 600) {
+function useDebouncedEffect(fn: () => void, deps: unknown[], delay = 600) {
   useEffect(() => {
     const t = setTimeout(fn, delay);
     return () => clearTimeout(t);
@@ -51,7 +51,7 @@ function useDebouncedEffect(fn: () => void, deps: any[], delay = 600) {
 
 export default function ThemeCustomizePage() {
   const router = useRouter();
-  const [theme, setTheme] = useState<any | null>(null);
+  const [theme, setTheme] = useState<any>(null);
   const [formData, setFormData] = useState<FormData>(EMPTY_FORM);
   const [copied, setCopied] = useState(false);
 
@@ -148,7 +148,7 @@ export default function ThemeCustomizePage() {
   }, [theme, formData]);
 
   // basic handlers
-  function setPath(path: string, value: any) {
+  function setPath(path: string, value: unknown) {
     setFormData((prev) => setDeepCopy(prev, path, value));
   }
 
