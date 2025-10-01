@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Eye, Sparkles, Github } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { themes } from "../../templates/themes";
 import SplitScreenForm from "../../components/SplitScreenForm";
 
@@ -27,7 +26,6 @@ export default function TemplatesPage() {
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showSplitScreen, setShowSplitScreen] = useState(false);
-  const router = useRouter();
 
   const handleThemeSelect = (theme: Theme) => {
     setSelectedTheme(theme);
@@ -281,7 +279,7 @@ export default function TemplatesPage() {
                           {selectedTheme?.name}
                         </h2>
                         <p className="text-gray-600 leading-relaxed">
-                          This template features a unique design that's perfect for showcasing your personality and professional skills.
+                          This template features a unique design that&apos;s perfect for showcasing your personality and professional skills.
                         </p>
                       </div>
 

@@ -65,7 +65,7 @@ export default function SplitScreenForm({ themeId, onBack }: SplitScreenFormProp
       </div>
     );
   }
-
+  
   // Initialize form data with theme presets and localStorage
   useEffect(() => {
     const initialData: Record<string, Record<string, unknown>> = {};
