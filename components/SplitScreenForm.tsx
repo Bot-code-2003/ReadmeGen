@@ -33,6 +33,7 @@ interface Theme {
   name: string;
   markdownTemplate: string;
   order?: string[];
+  presets?: Record<string, unknown>;
   formMeta?: {
     sections?: FormSection[];
   };
@@ -43,85 +44,88 @@ interface SplitScreenFormProps {
   onBack: () => void;
 }
 
+type FormDataState = Record<string, Record<string, unknown>>;
+
 export default function SplitScreenForm({ themeId, onBack }: SplitScreenFormProps) {
-  const [formData, setFormData] = useState<Record<string, Record<string, unknown>>>({});
+  const [formData, setFormData] = useState<FormDataState>({});
   const [copied, setCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Find the selected theme
   const selectedTheme = themes.find((theme: Theme) => theme.id === themeId);
   
-  if (!selectedTheme) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold text-gray-900">Theme not found</h2>
-          <button
-            onClick={onBack}
-            className="px-6 py-3 bg-gray-900 text-white rounded-full font-medium hover:bg-gray-800 transition-colors"
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
-  }
-  
   // Initialize form data with theme presets and localStorage
   useEffect(() => {
-    const initialData: Record<string, Record<string, unknown>> = {};
-    
-    // Load existing data from localStorage first
-    const savedData = localStorage.getItem('formData');
-    let existingData: Record<string, Record<string, unknown>> = {};
-    if (savedData) {
-      try {
-        existingData = JSON.parse(savedData);
-      } catch (error) {
-        console.error('Error parsing saved form data:', error);
-      }
+    if (!selectedTheme) {
+      setIsLoading(false);
+      return;
     }
     
-    // Only show sections that are in the theme's order (what the theme actually uses)
-    const themeSections = selectedTheme.order || [];
-    
-    if (selectedTheme.formMeta?.sections) {
-      selectedTheme.formMeta.sections.forEach((section: any) => {
-        // Only include sections that are in the theme's order
-        if (themeSections.includes(section.id)) {
-          section.fields.forEach((field: any) => {
-            const sectionId = section.id;
-            if (!initialData[sectionId]) {
-              initialData[sectionId] = {};
-            }
-            
-            // Priority: existing localStorage data > theme presets > defaults
-            const existingValue = existingData[sectionId]?.[field.id];
-            if (existingValue !== undefined && existingValue !== '') {
-              initialData[sectionId][field.id] = existingValue;
-            } else {
-              // Use preset values if available
-              const presetValue = (selectedTheme.presets as any)[sectionId];
-              if (presetValue && typeof presetValue === 'object' && presetValue[field.id]) {
-                initialData[sectionId][field.id] = presetValue[field.id];
-              } else if (presetValue && typeof presetValue === 'string' && field.id === 'content') {
-                initialData[sectionId][field.id] = presetValue;
+    const initializeFormData = () => {
+      const initialData: FormDataState = {};
+      
+      // Load existing data from localStorage first
+      const savedData = localStorage.getItem('formData');
+      let existingData: FormDataState = {};
+      if (savedData) {
+        try {
+          existingData = JSON.parse(savedData) as FormDataState;
+        } catch (error) {
+          console.error('Error parsing saved form data:', error);
+        }
+      }
+      
+      // Only show sections that are in the theme's order (what the theme actually uses)
+      const themeSections = selectedTheme.order || [];
+      
+      if (selectedTheme.formMeta?.sections) {
+        selectedTheme.formMeta.sections.forEach((section: FormSection) => {
+          // Only include sections that are in the theme's order
+          if (themeSections.includes(section.id)) {
+            section.fields.forEach((field: FormField) => {
+              const sectionId = section.id;
+              if (!initialData[sectionId]) {
+                initialData[sectionId] = {};
+              }
+              
+              // Priority: existing localStorage data > theme presets > defaults
+              const existingValue = existingData[sectionId]?.[field.id];
+              if (existingValue !== undefined && existingValue !== '') {
+                initialData[sectionId][field.id] = existingValue;
+              } else if (selectedTheme.presets?.[sectionId]) {
+                // Use preset values if available
+                const presetValue = selectedTheme.presets[sectionId];
+                if (typeof presetValue === 'object' && presetValue && field.id in (presetValue as Record<string, unknown>)) {
+                  initialData[sectionId][field.id] = (presetValue as Record<string, unknown>)[field.id];
+                } else if (typeof presetValue === 'string' && field.id === 'content') {
+                  initialData[sectionId][field.id] = presetValue;
+                } else if (field.type === 'checkbox') {
+                  initialData[sectionId][field.id] = field.defaultValue ?? false;
+                } else if (field.type === 'multiselect') {
+                  initialData[sectionId][field.id] = [];
+                } else {
+                  initialData[sectionId][field.id] = '';
+                }
               } else if (field.type === 'checkbox') {
-                initialData[sectionId][field.id] = (field as any).defaultValue || false;
+                initialData[sectionId][field.id] = field.defaultValue ?? false;
               } else if (field.type === 'multiselect') {
                 initialData[sectionId][field.id] = [];
               } else {
                 initialData[sectionId][field.id] = '';
               }
-            }
-          });
-        }
-      });
-    }
+            });
+          }
+        });
+      }
+      
+      setFormData(initialData);
+      setIsLoading(false);
+    };
     
-    setFormData(initialData);
+    initializeFormData();
   }, [selectedTheme]);
 
-  const handleFieldChange = (sectionId: string, fieldId: string, value: any) => {
+  const handleFieldChange = (sectionId: string, fieldId: string, value: unknown) => {
     const newFormData = {
       ...formData,
       [sectionId]: {
@@ -136,37 +140,65 @@ export default function SplitScreenForm({ themeId, onBack }: SplitScreenFormProp
   };
 
   // Convert our form data to the expected FormData structure
-  const convertToFormData = (data: any) => {
-    return {
-      hero: {
-        name: data.hero?.name || "",
-        tagline: data.hero?.tagline || "",
-        name_encoded: encodeURIComponent(data.hero?.name || "")
-      },
-      about: data.about?.content || "",
-      stack: data.stack?.technologies || [],
-      hobbies: data.hobbies?.content || "",
-      stats: {
-        showStats: data.stats?.showStats || false,
-        showTrophies: data.stats?.showTrophies || false,
-        github_username: data.stats?.github_username || ""
-      },
-      socials: {
-        github: data.socials?.github || "",
-        twitter: data.socials?.twitter || "",
-        linkedin: data.socials?.linkedin || "",
-        website: data.socials?.website || "",
-        instagram: data.socials?.instagram || ""
-      },
-      quote: data.end_quote?.content || "",
-      end_quote: {
-        content: data.end_quote?.content || ""
-      },
-      custom_md: data.custom_md?.content || ""
+  interface FormattedFormData {
+    hero: {
+      name: string;
+      tagline: string;
+      name_encoded: string;
     };
-  };
+    about: string;
+    stack: string[];
+    hobbies: string;
+    stats: {
+      showStats: boolean;
+      showTrophies: boolean;
+      github_username: string;
+    };
+    socials: {
+      github: string;
+      twitter: string;
+      linkedin: string;
+      website: string;
+      instagram: string;
+    };
+    quote: string;
+    end_quote: {
+      content: string;
+    };
+    custom_md: string;
+  }
+
+  const convertToFormData = (data: FormDataState): FormattedFormData => ({
+    hero: {
+      name: (data.hero?.name as string) || "",
+      tagline: (data.hero?.tagline as string) || "",
+      name_encoded: encodeURIComponent((data.hero?.name as string) || "")
+    },
+    about: (data.about?.content as string) || "",
+    stack: (data.stack?.technologies as string[]) || [],
+    hobbies: (data.hobbies?.content as string) || "",
+    stats: {
+      showStats: (data.stats?.showStats as boolean) || false,
+      showTrophies: (data.stats?.showTrophies as boolean) || false,
+      github_username: (data.stats?.github_username as string) || ""
+    },
+    socials: {
+      github: (data.socials?.github as string) || "",
+      twitter: (data.socials?.twitter as string) || "",
+      linkedin: (data.socials?.linkedin as string) || "",
+      website: (data.socials?.website as string) || "",
+      instagram: (data.socials?.instagram as string) || ""
+    },
+    quote: (data.end_quote?.content as string) || "",
+    end_quote: {
+      content: (data.end_quote?.content as string) || ""
+    },
+    custom_md: (data.custom_md?.content as string) || ""
+  });
 
   const handleCopy = async () => {
+    if (!selectedTheme) return;
+    
     try {
       const convertedData = convertToFormData(formData);
       const markdown = fillTemplate(selectedTheme.markdownTemplate, convertedData, selectedTheme);
@@ -178,7 +210,7 @@ export default function SplitScreenForm({ themeId, onBack }: SplitScreenFormProp
     }
   };
 
-  const renderField = (section: any, field: any) => {
+  const renderField = (section: FormSection, field: FormField) => {
     const sectionId = section.id;
     const value = formData[sectionId]?.[field.id] || '';
 
@@ -201,7 +233,6 @@ export default function SplitScreenForm({ themeId, onBack }: SplitScreenFormProp
             />
           </div>
         );
-
       case 'textarea':
         return (
           <div key={field.id} className="space-y-2">
@@ -213,165 +244,144 @@ export default function SplitScreenForm({ themeId, onBack }: SplitScreenFormProp
               placeholder={field.placeholder}
               value={String(value || '')}
               onChange={(e) => handleFieldChange(sectionId, field.id, e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-gray-400 focus:outline-none transition-all duration-200 min-h-[120px]"
               rows={field.rows || 4}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-gray-400 focus:outline-none transition-all duration-200 resize-none"
               maxLength={field.maxLength}
             />
-            {field.maxLength && (
-              <p className="text-xs text-gray-500 text-right">
-                {String(value || '').length}/{field.maxLength}
-              </p>
-            )}
           </div>
         );
-
       case 'checkbox':
         return (
-          <div key={field.id} className="flex items-center space-x-3">
+          <div key={field.id} className="flex items-center space-x-2">
             <input
               type="checkbox"
+              id={`${sectionId}-${field.id}`}
               checked={Boolean(value)}
               onChange={(e) => handleFieldChange(sectionId, field.id, e.target.checked)}
-              className="w-5 h-5 text-gray-900 border-gray-300 rounded focus:ring-gray-500"
+              className="h-4 w-4 text-gray-900 focus:ring-gray-900 border-gray-300 rounded"
             />
-            <label className="text-sm font-medium text-gray-700">
-              {field.label}
-            </label>
-          </div>
-        );
-
-      case 'multiselect':
-        return (
-          <div key={field.id} className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700">
+            <label htmlFor={`${sectionId}-${field.id}`} className="text-sm text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-40 overflow-y-auto">
-              {field.options?.map((option: string) => {
-                const isSelected = Array.isArray(value) && value.includes(option);
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => {
-                      const currentValues = Array.isArray(value) ? value : [];
-                      const newValues = isSelected
-                        ? currentValues.filter((v) => v !== option)
-                        : [...currentValues, option];
-                      handleFieldChange(sectionId, field.id, newValues);
-                    }}
-                    className={`px-3 py-2 text-sm rounded-lg border transition-all duration-200 capitalize ${
-                      isSelected
-                        ? 'bg-gray-900 text-white border-gray-900'
-                        : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {option}
-                  </button>
-                );
-              })}
-            </div>
           </div>
         );
-
       default:
         return null;
     }
   };
 
-  // Generate live preview markdown
-  const liveMarkdown = (() => {
-    try {
-      const convertedData = convertToFormData(formData);
-      return fillTemplate(selectedTheme.markdownTemplate, convertedData, selectedTheme);
-    } catch (error) {
-      console.error('Error generating preview:', error);
-      return "# Loading preview...\n\nPlease fill in the form fields to see your README preview.";
-    }
-  })();
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white/95 backdrop-blur-sm border-b border-gray-100 px-8 py-5 flex items-center justify-between shadow-sm">
-        <div className="flex items-center space-x-6">
-          <motion.button
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-gray-500">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!selectedTheme) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold text-gray-900">Theme not found</h2>
+          <button
             onClick={onBack}
-            className="flex items-center space-x-2 px-4 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-200 border border-gray-200/60"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="px-6 py-3 bg-gray-900 text-white rounded-full font-medium hover:bg-gray-800 transition-colors"
+            type="button"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="font-medium">Back</span>
-          </motion.button>
-          <div className="border-l border-gray-200 pl-6">
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{selectedTheme.name}</h1>
-            <p className="text-sm text-gray-500 font-medium">Customize your GitHub profile</p>
-          </div>
+            Go Back
+          </button>
         </div>
-        
-        <motion.button
-          onClick={handleCopy}
-          className={`flex items-center space-x-3 px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-sm ${
-            copied
-              ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
-              : 'bg-gray-900 hover:bg-gray-800 text-white border border-gray-800 hover:shadow-md'
-          }`}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-          <span>{copied ? 'Copied to Clipboard!' : 'Copy README'}</span>
-        </motion.button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <button
+            onClick={onBack}
+            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+            type="button"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to themes</span>
+          </button>
+          
+          <div className="flex items-center space-x-4">
+            <h1 className="text-xl font-bold text-gray-900">{selectedTheme.name} Editor</h1>
+          </div>
+          
+          <button
+            onClick={handleCopy}
+            disabled={copied}
+            type="button"
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              copied
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-900 text-white hover:bg-gray-800'
+            }`}
+          >
+            {copied ? (
+              <>
+                <Check className="w-5 h-5" />
+                <span>Copied!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-5 h-5" />
+                <span>Copy README</span>
+              </>
+            )}
+          </button>
+        </div>
       </header>
 
-      {/* Split Screen Content */}
-      <div className="max-w-7xl mx-auto h-[calc(100vh-80px)] flex">
-        {/* Left Side - Form */}
-        <div className="w-1/2 p-8 bg-white border-r border-gray-200 overflow-y-auto">
-          <div className="max-w-lg mx-auto space-y-8">
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold text-gray-900">Customize Your README</h2>
-              <p className="text-gray-600">Fill in the details to generate your personalized README</p>
-            </div>
-
-            {selectedTheme.formMeta?.sections?.filter((section: any) => 
-              (selectedTheme.order || []).includes(section.id)
-            ).map((section: any) => (
+      {/* Main Content */}
+      <main className="flex-1 flex overflow-hidden">
+        {/* Form Section */}
+        <div className="w-1/2 p-6 overflow-y-auto">
+          <div className="max-w-2xl mx-auto space-y-8">
+            {selectedTheme.formMeta?.sections?.map((section) => (
               <motion.div
                 key={section.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-6"
+                transition={{ duration: 0.3 }}
+                className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
               >
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-gray-900">{section.title}</h3>
-                  <p className="text-sm text-gray-600">{section.description}</p>
-                </div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  {section.title}
+                </h2>
+                <p className="text-sm text-gray-500 mb-6">{section.description}</p>
                 
-                <div className="space-y-4">
-                  {section.fields.map((field: any) => renderField(section, field))}
+                <div className="space-y-6">
+                  {section.fields.map((field) => renderField(section, field))}
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
 
-        {/* Right Side - Live Preview */}
-        <div className="w-1/2 border-l border-gray-200 bg-white">
-          <div className="h-full flex flex-col">
-            <div className="p-4 border-b border-gray-200 bg-gray-50">
-              <h3 className="text-lg font-semibold text-gray-900">Live Preview</h3>
-              <p className="text-sm text-gray-600">See your README update in real-time</p>
-            </div>
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="prose prose-sm max-w-none">
-                <MarkdownPreview markdown={liveMarkdown} />
-              </div>
-            </div>
+        {/* Preview Section */}
+        <div className="w-1/2 bg-gray-50 border-l border-gray-200 p-6 overflow-y-auto">
+          <div className="sticky top-0 bg-gray-50 py-4 mb-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">Live Preview</h2>
+          </div>
+          
+          <div className="prose max-w-none">
+            <MarkdownPreview 
+              content={fillTemplate(
+                selectedTheme.markdownTemplate, 
+                convertToFormData(formData), 
+                selectedTheme
+              )} 
+            />
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
