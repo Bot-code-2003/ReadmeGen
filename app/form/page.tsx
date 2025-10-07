@@ -45,13 +45,12 @@ function useDebouncedEffect(fn: () => void, deps: unknown[], delay = 600) {
   useEffect(() => {
     const t = setTimeout(fn, delay);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [...deps, delay, fn]);
 }
 
 export default function ThemeCustomizePage() {
   const router = useRouter();
-  const [theme, setTheme] = useState<any>(null);
+  const [theme, setTheme] = useState<typeof themes[number] | null>(null);
   const [formData, setFormData] = useState<FormData>(EMPTY_FORM);
   const [copied, setCopied] = useState(false);
 

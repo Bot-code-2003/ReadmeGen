@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Eye, Sparkles, Github } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowLeft, ArrowRight, Sparkles, Github } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { themes } from "../../templates/themes";
 import SplitScreenForm from "../../components/SplitScreenForm";
@@ -126,48 +127,30 @@ export default function TemplatesPage() {
                   hidden: { opacity: 0 },
                   visible: {
                     opacity: 1,
-                    transition: {
                       staggerChildren: 0.1
                     }
                   }
                 }}
               >
-                {themes.map((theme, index) => {
+                {themes.map((theme, index) => (
                   const itemVariants = {
                     hidden: { opacity: 0, y: 30 },
                     visible: { 
                       opacity: 1, 
                       y: 0,
-                      transition: { duration: 0.6, ease: "easeOut" }
-                    }
-                  };
-
-                  return (
-                    <motion.div
-                      key={theme.id}
-                      variants={itemVariants}
-                      whileHover={{ y: -6, scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                      className="relative flex flex-col h-full rounded-2xl bg-white border border-gray-200 shadow-sm transition-all duration-300 overflow-hidden group cursor-pointer"
-                      onClick={() => handleThemeSelect(theme)}
-                    >
-                      {/* Banner Image */}
-                      <motion.div 
-                        className="h-[320px] w-full relative overflow-hidden"
+{{ ... }}
                         whileHover="hover"
                         initial="initial"
                       >
-                        <motion.img
-                          src={`/assets/${theme.name}.png`}
-                          alt={theme.name}
-                          className="w-full h-auto min-h-full object-cover object-top"
-                          variants={{
-                            initial: { y: 0 },
-                            hover: { y: -300 },
-                          }}
-                          transition={{
-                            duration: 0.8,
-                            ease: "easeInOut"
+                        <div className="relative w-full h-48">
+                          <Image
+                            src={theme.banner}
+                            alt={`${theme.name} banner`}
+                            fill
+                            className="object-cover rounded-t-lg"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            priority={index < 3} // Only preload first 3 images
+                          />
                           }}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-import { Github, Coffee, Eye, Check, Copy } from "lucide-react";
+import { Github, Coffee, Check, Copy, Eye } from "lucide-react";
 
 const defaultFormData: FormData = {
   hero: { name: "Dharmadeep Madisetty", tagline: "AI/ML Engineer" },
@@ -29,16 +29,23 @@ const defaultFormData: FormData = {
 /**
  * Simple deep-set helper for dot-notation keys (e.g. "hero.name")
  */
-function deepSet(obj: Record<string, any>, path: string, value: any) {
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
+
+function deepSet<T extends Record<string, any>>(obj: T, path: string, value: unknown): void {
   const parts = path.split(".");
-  let cur = obj;
+  let current: any = obj;
+  
   for (let i = 0; i < parts.length - 1; i++) {
-    const p = parts[i];
-    if (!cur[p] || typeof cur[p] !== "object") cur[p] = {};
-    if (Array.isArray(cur[p])) cur[p] = [...cur[p]];
-    cur = cur[p];
+    const part = parts[i];
+    if (current[part] === undefined || current[part] === null) {
+      current[part] = {};
+    }
+    current = current[part];
   }
-  cur[parts[parts.length - 1]] = value;
+  
+  current[parts[parts.length - 1]] = value;
 }
 
 /**
@@ -46,7 +53,7 @@ function deepSet(obj: Record<string, any>, path: string, value: any) {
  * Then navigate to a route using next/router.
  */
 function prefillDraftAndNavigate(
-  patch: Record<string, any> = {},
+  patch: DeepPartial<FormData> = {},
   themeId?: string,
   routerPush?: (path: string) => void,
   navigateTo: string = "/form"
@@ -76,9 +83,9 @@ function PreviewModalSimple({
   onProceed,
 }: {
   isOpen: boolean;
-  theme: any | null;
+  theme: (typeof themes)[number] | null;
   onClose: () => void;
-  onProceed: (theme: any) => void;
+  onProceed: (theme: (typeof themes)[number]) => void;
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
